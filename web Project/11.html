@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yara's Puzzle</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Nerko+One&display=swap");
+
+
+    #part1 {
+      width: 100%;
+      display: flex;
+      margin: auto;
+      justify-content: space-around;
+    }
+
+    #img,
+    #pieces,
+    #puzzle {
+      width: 309px;
+    }
+
+    table {
+      width: 300px;
+      height: 300px;
+    }
+
+    #part2 {
+      text-align: center;
+      margin: auto;
+    }
+
+    button {
+      color: rgb(95, 84, 84);
+      font-size: 30px;
+      background-color: rgb(134, 134, 196);
+      margin: auto;
+      margin-top: 10px;
+      padding: 15px;
+      font-family: "Nerko One", cursive;
+      border-radius: 10px;
+      border: solid rgb(95, 84, 84) 1px;
+
+    }
+
+    button:hover {
+      border: solid rgb(255, 255, 0) 3px;
+    }
+
+    img {
+      width: 300px;
+      height: 300px;
+    }
+
+    h3 {
+      text-align: center;
+      font-size: 25px;
+      font-family: "Architects Daughter", cursive;
+    }
+
+    .pp {
+      width: 100px;
+      height: 100px;
+      float: left;
+      background-image: url(img.jpg);
+      background-repeat: no-repeat;
+      border: 1px solid black;
+    }
+
+    .space{
+      border: 1px solid black;
+    }
+
+    #pNext {
+      background-color: rgb(148, 18, 18);
+      position: relative;
+      width: 95%;
+      height: 75%;
+      align-self: center;
+      margin-left: 10px;
+    }
+
+    #forHint {
+      width: 10px;
+      background-color: rgb(0, 0, 0);
+      color: rgb(255, 255, 255);
+      visibility: hidden;
+      opacity: 0.5;
+
+      /* z-index: 6; */
+    }
+
+    span #forHint {
+      width: 10px;
+      background-color: rgb(0, 0, 0);
+      color: rgb(255, 255, 255);
+      visibility: hidden;
+      opacity: 0.5;
+
+      /* z-index: inherit 3; */
+    }
+
+    h1 {
+      display: none;
+      position: fixed;
+      left: 100px;
+      top: 150px;
+      opacity: 0.5;
+      background-color: rgb(10, 10, 10);
+      color: rgb(255, 255, 255);
+      font-size: 130px;
+      z-index: 55;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 id="final">Congratulations</h1>
+
+  <div id="part1">
+    <div id="img">
+      <h3>Original Image</h3>
+      <img src="img.jpg" alt="" />
+      <div id="rand"></div>
+    </div>
+
+    <div id="pieces">
+      <h3>Pieces</h3>
+      <div id="pNext"></div>
+    </div>
+
+    <div id="puzzle">
+      <h3>Puzzle</h3>
+      <div id="puzzle2"></div>
+    </div>
+  </div>
+
+  <div id="part2">
+    <button type="button" id="hh">Hints</button>
+  </div>
+
+  <p>**When a piece gets chosen and goes to the puzzle area.     
+   Then it is clicked and sent back to pieces area if it gets chosen 
+    again we must click on the location we want it to go (on puzzle area) TWICE 
+    (there is something in my code that makes it a must to click on puzzle area twice for those pieces)
+    Thank you
+
+  </p>
+
+  <h4>After all pieces are there (clicked once/twice for some) Congratulations part works. Thank you</h4>
+</body>
+<script>
+  var flag = false;
+
+  $(function () {
+    //hint mouse function
+    $("button").mouseenter(function (e) {
+      $(this).css("background", "rgb(173,216,230)");
+      $(this).css("color", "black");
+    });
+    $("button").mouseleave(function (e) {
+      $(this).css("background", "rgb(134, 134, 196)");
+    });
+    //hint bool if clicked_puzzle once/twice
+    var num = 0;
+    $("#hh").click(function () {
+      num++;
+      if (num === 1) {
+        $(".pp #forHint").css("visibility", "visible");
+      } else {
+        $(".pp #forHint").css("visibility", "hidden");
+      }
+
+      if (num === 2) num = 0;
+    });
+
+    var row = 3,
+      col = 3;
+    var pie = "";
+
+    var uselessClick = false; // to solve the multiple click triggers
+    //loop
+    var count2 = 0;
+    for (var i = 0, top = 0; i < row; i++, top -= 100) {
+      for (var j = 0, left = 0; j < col; j++, left -= 100) {
+        count2++;
+        pie +=
+          "<div style='background-position:" +
+          left +
+          "px " +
+          top +
+          "px;' class='pp' id=pi" +
+          i +
+          j +
+          "><span id='forHint'>" +
+          count2 +
+          "</span></div>";
+        // console.log(img);
+      }
+    }
+    $("#rand").html(pie);
+
+    var pieces = $("#img div");
+
+    pieces.each(function () {
+      var lpos = Math.floor(Math.random() * 190) + 0 + "px";
+      var tpos = Math.floor(Math.random() * 190) + 0 + "px";
+      $(this).addClass("pie").css({
+        position: "absolute",
+        left: lpos,
+        top: tpos,
+      });
+      $("#pNext").append($(this));
+    });
+    //puzzle location
+    var empty = "";
+    count = 0;
+    for (var i = 0; i < row; i++) {
+      for (var j = 0; j < col; j++) {
+        count++;
+        empty +=
+          "<div style='background-image: none;' class='pp space' id='space" + i + j + "'><span id = 'forHint'>" +
+          count +
+          "</span></div>";
+      }
+    }
+    $("#puzzle2").html(empty);
+
+    mainPart();
+
+    function CongratsPart() {
+      $("#final")
+        .fadeIn(1500, function () {
+          $("#final").css("display", "inherit");
+        })
+        .delay(500)
+        .fadeOut(1000);
+
+      // return true;
+    }
+
+
+    function mainPart() {
+      var clicked_puzzle = false;
+      var part;
+      $("#pNext .pp").click(function () {
+        part = $(this);
+        if (part.hasClass("pie")) {
+          $(this).removeClass("pie");
+          $(this).parent().removeClass("here");
+         // flag = true;
+        }
+        part.css("border-color", "yellow");
+        $(".pp").not(this).css("border-color", "black");
+        clicked_puzzle = true;
+      });
+      $("#puzzle2 .space").click(function () {
+        function ishere() {
+          console.log($(this).hasClass("here"));
+          return !$(this).hasClass("here");
+        }
+        var table_part = $(this);
+        if (
+          ishere &&
+          !$(part).hasClass("inPuzzle") &&
+          uselessClick === false
+        ) {
+          table_part.addClass("here");
+          $(part).addClass("inPuzzle");
+          $(part).fadeOut(400, function () {
+            part
+              .css({
+                border: "none",
+                position: "relative",
+                left: "0",
+                top: "0",
+                padding: "0",
+                margin: "0",
+              })
+              .fadeIn(0)
+              .appendTo(table_part);
+            table_part.children("span").css("display", "none"); // dsiplay none for the hint Part
+            var isComplete = true;
+            for (var k = 0; k < 3; k++) {
+              for (var o = 0; o < 3; o++) {
+                var a = $('#space' + k + o).children().html();
+                var b = $("#space" + k + o).children(".inPuzzle").children().html();
+                //console.log(a+"    "+b);
+
+                if (a !== b) {
+                  isComplete = false;
+                }
+
+
+
+              }
+
+            }
+            if (isComplete === true) {
+              CongratsPart();
+
+            }
+
+          });
+         // flag = false;
+
+        } else {
+          uselessClick = false;
+        }
+        $(".inPuzzle").click(function (e) {
+          // e.preventDefault();
+          $(this).fadeOut(100);
+          $(this).fadeIn(100);
+          if (uselessClick === false) {
+            var lpos = Math.floor(Math.random() * 100) + 0 + "px";
+            var tpos = Math.floor(Math.random() * 100) + 0 + "px";
+          }
+          $(this).removeClass("inPuzzle");
+          $(this).parent('div').children("span").css("display", "inline");
+          $(this).addClass("inRandom");
+          $(this).css({
+            "background-position": "absolute",
+            left: lpos,
+            top: tpos,
+          });
+          $("#pNext").append($(this));
+          uselessClick = true;
+          document.getElementById("pNext").click();
+        });
+
+        // if (flag) {
+
+        //   table_part.addClass("inPuzzle");
+        //   $(part).addClass("pie");
+
+        //   $(part).fadeOut(400, function () {
+
+        //     $(part).css({
+        //       top: 0,
+        //       left: 0,
+        //       position: "relative",
+        //       border: "",
+        //     }).fadeIn(0).appendTo(table_part);
+
+        //     table_part.children("span").css("display", "none");
+            
+        //   });
+
+
+        //   flag= false;
+
+
+
+
+
+
+        // }
+
+
+
+
+      });
+    }
+  });
+</script>
+
+</html>
